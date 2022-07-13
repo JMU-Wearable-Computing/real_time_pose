@@ -1,6 +1,9 @@
 
 
 class FeedbackDevice:
+    '''
+    Abstract base class for Feedback Device
+    '''
 
     def __init__(self) -> None:
         pass
