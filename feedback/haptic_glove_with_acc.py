@@ -40,8 +40,21 @@ class HapticGloveAcc(FeedbackDevice):
             self.socket.send(f'{message}\n'.encode('ascii'))
 
     def send_pull_feedback(self, current_pt: np.array, goal_pt: np.array):
+        '''
+        Sends PULL feedback to the glove.
+
+        Args:
+            current_pt: current position on th screen
+            goal_pt: goal position
+
+        Returns: None
+        '''
+
+        # query glove for current acceleration vector
+        # results are stored within class as self.accel_norm
         self.get_acceleration()
-        
+
+        # based upon acceleration select the CURRENT motor
         if (self.accel_norm[1] > 0.7):
             self.CURRENT_MOTORS = self.MOTORS
         elif (self.accel_norm[1] < -0.7):
@@ -50,7 +63,11 @@ class HapticGloveAcc(FeedbackDevice):
             self.CURRENT_MOTORS = self.MOTORS_L
         elif (self.accel_norm[0] < -0.7 ):
             self.CURRENT_MOTORS = self.MOTORS_R
+
+
         goal = goal_pt# - self.accel_data
+
+        # determine intensity for CURRENT motors
         intensity = self.find_intensity_array(current_pt, goal, self.CURRENT_MOTORS, norm=True)
 
         # print(goal, intensity)
@@ -126,6 +143,12 @@ class HapticGloveAcc(FeedbackDevice):
         return intensity
     
     def get_acceleration(self):
+        '''
+        Query the glove for its current acceleration vector <x,y,z>
+
+        Returns:
+            None. Self assignment to internal accel_data field
+        '''
         self.socket.send('accel\n'.encode('ascii'))
         msg = self.socket.recv(4096).decode("ascii").split('\r')[0].split('\n')[0]
         try: 
